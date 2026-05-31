@@ -1,7 +1,7 @@
-/// <summary>
-/// Training Management System (TMS) - Sessions 1 & 2 Implementation
+﻿/// <summary>
+/// Training Management System (TMS) - Complete Implementation (Sessions 1, 2, 3)
 /// 
-/// This program demonstrates exercises from Module 1 Lab Sessions 1 and 2:
+/// This program demonstrates exercises from Module 1 Lab Sessions 1, 2, and 3:
 /// 
 /// SESSION 1: Data Model Foundation
 /// - Exercise 1: Null safety patterns with nullable reference types
@@ -12,7 +12,15 @@
 /// SESSION 2: Query and Classification
 /// - Exercise 4: Guard clauses for defensive programming
 /// - Exercise 5: LINQ analytics dashboard with filtering, sorting, and grouping
+/// 
+/// SESSION 3: Async and Resilience
+/// - Exercise 6: Async/await for parallel data loading
+/// - Exercise 6B: TMS enrollment engine with async operations
+/// - Exercise 7: Custom exceptions for domain-specific errors
+/// - Exercise 7B: Integration report with performance metrics
 /// </summary>
+
+using System.Diagnostics;
 
 Console.WriteLine("=== Training Management System (TMS) - Session 1: Data Model Foundation ===\n");
 
@@ -303,6 +311,203 @@ string[] frontendCourses = ["TypeScript", "Angular"];
 // Spread operator (..) combines arrays into a new array
 string[] allCourses = [..backendCourses, ..frontendCourses, "Capstone"];
 Console.WriteLine($"Full curriculum: {string.Join(", ", allCourses)}");
+
+// ============================================================================
+// SESSION 3: ASYNC AND RESILIENCE
+// ============================================================================
+// Session 3 demonstrates asynchronous programming and custom exception handling
+
+Console.WriteLine("\n\n=== SESSION 3: Async and Resilience ===\n");
+
+// ============================================================================
+// EXERCISE 6: ASYNC/AWAIT DEMONSTRATION
+// ============================================================================
+// Demonstrates the difference between blocking, async sequential, and async parallel execution
+// Shows how async/await prevents thread starvation and improves performance
+
+Console.WriteLine("--- Exercise 6: Thread Starvation vs Async Parallel ---");
+
+// BLOCKING SEQUENTIAL: Thread is held for entire duration (thread starvation)
+var sw = Stopwatch.StartNew();
+for (int i = 0; i < 5; i++)
+{
+    Thread.Sleep(300); // Thread is BLOCKED for 300ms - cannot serve other requests
+}
+Console.WriteLine($"Blocking sequential: {sw.ElapsedMilliseconds}ms");
+
+// ASYNC SEQUENTIAL: Thread is released while waiting, but still sequential
+sw.Restart();
+for (int i = 0; i < 5; i++)
+{
+    await Task.Delay(300); // Thread released while waiting, but operations run one after another
+}
+Console.WriteLine($"Async sequential: {sw.ElapsedMilliseconds}ms");
+
+// ASYNC PARALLEL: All operations start simultaneously (THE RIGHT WAY)
+sw.Restart();
+var tasks = Enumerable.Range(0, 5).Select(_ => Task.Delay(300));
+await Task.WhenAll(tasks); // All 5 delays run concurrently
+Console.WriteLine($"Async parallel: {sw.ElapsedMilliseconds}ms");
+
+// KEY TAKEAWAY: Async parallel is ~5x faster than sequential approaches
+// Blocking: ~1500ms, Async Sequential: ~1500ms, Async Parallel: ~300ms
+
+// ============================================================================
+// EXERCISE 6 PART B: TMS ENROLLMENT ENGINE WITH ASYNC
+// ============================================================================
+// Demonstrates real-world async pattern: loading students and courses in parallel
+
+Console.WriteLine("\n--- Exercise 6 Part B: Parallel Data Loading ---");
+
+sw.Restart();
+
+// Define data to load
+string[] studentIds = ["S1", "S2", "S3", "S4", "S5"];
+string[] courseCodes = ["CRS-101", "CRS-201", "CRS-301"];
+
+// Start all fetch operations simultaneously
+var studentTasks = studentIds.Select(id => FetchStudentAsync(id));
+var courseTasks = courseCodes.Select(code => FetchCourseAsync(code));
+
+// Wait for all operations to complete (students AND courses load concurrently)
+Student[] loadedStudents = await Task.WhenAll(studentTasks);
+Course[] courses = await Task.WhenAll(courseTasks);
+
+Console.WriteLine($"\nLoaded {loadedStudents.Length} students and {courses.Length} courses in {sw.ElapsedMilliseconds}ms");
+foreach (var s in loadedStudents)
+    Console.WriteLine($"  {s.Name} - GPA: {s.GPA}");
+
+// ============================================================================
+// ENROLLMENT PROCESSING WITH CAPACITY LIMITS
+// ============================================================================
+// Demonstrates custom exception handling with CapacityReachedException
+
+Console.WriteLine("\nProcessing Enrollments (Capacity = 2):");
+var enrollCourse = new Course { Code = "CRS-101", Title = "C# Mastery", Capacity = 2 };
+var enrollService = new EnrollmentService();
+var enrollments = new List<EnrollmentRecord>();
+var failures = new List<string>();
+
+foreach (var s in loadedStudents)
+{
+    try
+    {
+        var record = enrollService.ProcessRegistration(s, enrollCourse);
+        enrollCourse.EnrolledCount++;
+        enrollments.Add(record);
+        Console.WriteLine($"  ✓ Enrolled: {s.Name}");
+    }
+    catch (CapacityReachedException ex)
+    {
+        failures.Add($"{s.Name}: {ex.Message}");
+        Console.WriteLine($"  ✗ Rejected: {s.Name} - {ex.Message}");
+    }
+}
+
+// ============================================================================
+// EXERCISE 7: CUSTOM EXCEPTIONS
+// ============================================================================
+// Demonstrates domain-specific exception types for better error handling
+
+Console.WriteLine("\n--- Exercise 7: Custom Exception Handling ---");
+
+try
+{
+    // Create a course that's already at capacity to trigger the custom exception
+    var overflowCourse = new Course { Code = "CRS-999", Title = "Overflow Test", Capacity = 1 };
+    overflowCourse.EnrolledCount = 1; // Make it full
+    enrollService.ProcessRegistration(
+        new Student { Id = "S99", Name = "Test", Age = 20, GPA = 3.0m },
+        overflowCourse
+    );
+}
+catch (CapacityReachedException ex)
+{
+    Console.WriteLine($"\nDomain exception caught:");
+    Console.WriteLine($"  Course: {ex.CourseCode}");
+    Console.WriteLine($"  Message: {ex.Message}");
+}
+
+// ============================================================================
+// EXERCISE 7B: INTEGRATION REPORT
+// ============================================================================
+// Demonstrates comprehensive reporting with metrics
+
+sw.Stop();
+
+decimal classAverage = loadedStudents.Length > 0
+    ? loadedStudents.Average(s => s.GPA)
+    : 0m;
+
+Console.WriteLine("\n========== ENROLLMENT SUMMARY ==========");
+Console.WriteLine($"Total students loaded: {loadedStudents.Length}");
+Console.WriteLine($"Successful enrollments: {enrollments.Count}");
+Console.WriteLine($"Failed enrollments: {failures.Count}");
+Console.WriteLine($"Class average GPA: {classAverage:F2}");
+Console.WriteLine($"Total elapsed time: {sw.ElapsedMilliseconds}ms");
+
+if (failures.Count > 0)
+{
+    Console.WriteLine("\n--- Failure Details ---");
+    foreach (var failure in failures)
+        Console.WriteLine($"  {failure}");
+}
+Console.WriteLine("========================================");
+
+Console.WriteLine("\n=== All exercises from Sessions 1, 2, and 3 completed successfully! ===");
+
+// ============================================================================
+// HELPER METHODS
+// ============================================================================
+
+/// <summary>
+/// Simulates asynchronous student data loading from a database
+/// Uses Task.Delay to simulate network/database latency
+/// Returns a fully populated Student object with test data
+/// </summary>
+async Task<Student> FetchStudentAsync(string id)
+{
+    Console.WriteLine($"  → Fetching {id}...");
+    await Task.Delay(300); // Simulate database latency
+    return new Student
+    {
+        Id = id,
+        Name = $"Student-{id}",
+        Age = 20,
+        GPA = id switch
+        {
+            "S1" => 3.8m,
+            "S2" => 2.4m,
+            "S3" => 3.5m,
+            "S4" => 1.9m,
+            "S5" => 3.2m,
+            _ => 2.5m
+        }
+    };
+}
+
+/// <summary>
+/// Simulates asynchronous course data loading from a database
+/// Uses Task.Delay to simulate network/database latency
+/// Returns a fully populated Course object with test data
+/// </summary>
+async Task<Course> FetchCourseAsync(string code)
+{
+    Console.WriteLine($"  → Fetching course {code}...");
+    await Task.Delay(200); // Simulate database latency
+    return new Course
+    {
+        Code = code,
+        Title = $"Course-{code}",
+        Capacity = code switch
+        {
+            "CRS-101" => 2,
+            "CRS-201" => 30,
+            "CRS-301" => 15,
+            _ => 25
+        }
+    };
+}
 
 Console.WriteLine("\n=== Sessions 1 and 2 exercises completed successfully! ===");
 

@@ -38,8 +38,9 @@ public class EnrollmentService
 
         // Guard #4: Ensure course is not full
         // This is a runtime business condition, not a programmer error
+        // Use custom CapacityReachedException for domain-specific error handling
         if (course.EnrolledCount >= course.Capacity)
-            throw new InvalidOperationException($"Course {course.Code} is full. Enrolled: {course.EnrolledCount}, Capacity: {course.Capacity}.");
+            throw new CapacityReachedException(course.Code);
 
         // ============================================================================
         // ACADEMIC STANDING CLASSIFICATION - Pattern matching with switch expressions
