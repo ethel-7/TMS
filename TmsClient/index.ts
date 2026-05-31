@@ -1,91 +1,98 @@
 import { Temporal } from "@js-temporal/polyfill";
-import { Student, isStudent, parseStudent } from "./models/student.model";
+import { AssessmentItem, calculateGrade } from "./models/assessment.model";
+import { EnrollmentStatus, describeEnrollment } from "./models/enrollment.model";
+import { ApiResponse, renderResponse } from "./models/api-response.model";
+import { Student } from "./models/student.model";
 import { Course } from "./models/course.model";
 
-console.log("=== Training Management System (TMS) Client - Session 1: TypeScript Basics ===\n");
-
-// ============================================================================
-// EXERCISE 1: TYPESCRIPT TYPES AND INTERFACES
-// ============================================================================
-console.log("--- Exercise 1: Creating Student and Course Instances ---");
-
-const course1: Course = {
-    id: "CRS-101",
-    title: "Introduction to TypeScript",
-    capacity: 30,
-    startDate: Temporal.PlainDate.from("2026-09-01"),
+// Exercise 4: Assessment Types
+const quiz: AssessmentItem = {
+    id: "QUIZ-001",
+    kind: "quiz",
+    title: "SQL Basics",
+    correctAnswers: 8,
+    totalQuestions: 10,
 };
 
-const student1: Student = {
-    id: "STU-001",
-    name: "Dawit Bekele",
-    enrollmentDate: Temporal.Now.instant(),
-    gpa: 3.8,
+const lab: AssessmentItem = {
+    id: "LAB-001",
+    kind: "lab",
+    title: "REST API Project",
+    functionalityScore: 85,
+    codeQualityScore: 90,
 };
 
-console.log(`Course Created: ${course1.title} (ID: ${course1.id}, Capacity: ${course1.capacity})`);
-console.log(`Student Created: ${student1.name} (ID: ${student1.id}, GPA: ${student1.gpa})`);
+console.log(`Quiz grade: ${calculateGrade(quiz)}%`);
+console.log(`Lab grade: ${calculateGrade(lab)}%`);
 
-// ============================================================================
-// EXERCISE 2: TYPE GUARD ENFORCEMENT
-// ============================================================================
-console.log("\n--- Exercise 2: Type Guard Enforcement ---");
+// Test readonly - this should cause a TypeScript error
+// quiz.id = "QUIZ-999";
 
-const unknownObject: unknown = {
-    id: "STU-999",
-    name: "Abeba Kebede",
-    enrollmentDate: Temporal.Now.instant(),
+// Exercise 5: Enrollment Lifecycle
+const pending: EnrollmentStatus = {
+    status: "PENDING",
+    requestedAt: Temporal.Now.instant(),
+    studentId: "STU-001",
+    courseId: "CRS-101",
 };
 
-if (isStudent(unknownObject)) {
-    console.log(`✓ Object is a valid Student: ${unknownObject.name} (ID: ${unknownObject.id})`);
-} else {
-    console.log("✗ Object is not a valid Student");
-}
+console.log(describeEnrollment(pending));
 
-const invalidObject: unknown = {
-    title: "Not a Student",
-    capacity: 10,
+// Exercise 6: ApiResponse Generic
+const studentRes: ApiResponse<Student> = {
+    status: "success",
+    data: {
+        id: "STU-001",
+        name: "Dawit Bekele",
+        enrollmentDate: Temporal.Now.instant(),
+        gpa: 3.4,
+    },
+    fetchedAt: Temporal.Now.instant(),
 };
 
-if (isStudent(invalidObject)) {
-    console.log("✓ Object is a valid Student");
-} else {
-    console.log("✗ Object is not a valid Student (Correct behavior)");
-}
+console.log(
+    renderResponse(studentRes, (s) => `${s.name} GPA: ${s.gpa ?? "N/A"}`),
+);
 
-// ============================================================================
-// EXERCISE 3: ROBUST STUDENT PARSING
-// ============================================================================
-console.log("\n--- Exercise 3: Robust Student Parsing ---");
-
-const validRawJson = {
-    id: "STU-002",
-    name: "Kidane Wolde",
+const courseListRes: ApiResponse<Course[]> = {
+    status: "success",
+    data: [
+        {
+            id: "CRS-101",
+            title: "Web Development Fundamentals",
+            capacity: 30,
+            startDate: Temporal.PlainDate.from("2026-09-01"),
+        },
+    ],
+    fetchedAt: Temporal.Now.instant(),
 };
 
-try {
-    const parsedStudent = parseStudent(validRawJson);
-    console.log(`✓ Parse Successful: ${parsedStudent.name} (ID: ${parsedStudent.id})`);
-    console.log(`  Enrollment Date: ${parsedStudent.enrollmentDate}`);
-} catch (error) {
-    if (error instanceof Error) {
-        console.error(`✗ Parse Failed: ${error.message}`);
-    }
-}
+console.log(
+    renderResponse(courseListRes, (courses) =>
+        courses.map((c) => c.title).join(", "),
+    ),
+);
 
-const invalidRawJson = {
-    id: "STU-003",
-    // Missing 'name' property
-};
+// Exercise 7: Temporal Timestamps
+// 1. Record the exact moment an enrollment is approved (UTC)
+const approvedAt = Temporal.Now.instant();
+console.log(`Approved at (UTC): ${approvedAt}`);
 
-try {
-    const parsedStudent = parseStudent(invalidRawJson);
-    console.log(`✓ Parse Successful: ${parsedStudent.name}`);
-} catch (error) {
-    if (error instanceof Error) {
-        console.log(`✓ Catch block executed correctly (Expected parse error): ${error.message}`);
-    }
-}
+// 2. Display in local timezone
+const addisTime = approvedAt.toZonedDateTimeISO("Africa/Addis_Ababa");
+const londonTime = approvedAt.toZonedDateTimeISO("Europe/London");
+console.log(`Addis: ${addisTime.toPlainTime()}`);
+console.log(`London: ${londonTime.toPlainTime()}`);
 
-console.log("\n=== Session 1 TypeScript exercises completed successfully! ===");
+// 3. Course start date (date only, no time)
+const courseStart = Temporal.PlainDate.from("2026-09-01");
+const today = Temporal.Now.plainDateISO();
+const daysUntilStart = today.until(courseStart).total({ unit: "days" });
+console.log(`${Math.floor(daysUntilStart)} days until course starts`);
+
+// 4. Assignment deadline duration
+const deadline = Temporal.PlainDate.from("2026-12-15");
+const remaining = today.until(deadline);
+console.log(
+    `${remaining.total({ unit: "days" })} days until assignment is due`,
+);
