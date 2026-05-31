@@ -1,49 +1,36 @@
 # Training Management System (TMS) - Core Logic Engine
 
-## Session 1: Data Model Foundation
+## Sessions 1 & 2: Data Model Foundation and Query Classification
 
-A professional C# 14 (.NET 10) implementation of the Data Model Foundation, demonstrating modern C# features for building robust, type-safe data models.
+A professional C# 14 (.NET 10) implementation demonstrating modern features for building robust data models, defensive programming with guard clauses, and advanced data analytics with LINQ.
 
 ## Project Overview
 
-This project implements the core domain models and grade processing interface contract for a Training Management System.
+This project implements the core domain models, business logic, and analytics for the Training Management System.
 
-Session 1 establishes a solid foundation with:
-1. **Null Safety**: Using C# nullable reference types and null-coalescing operators to prevent `NullReferenceException` crashes.
-2. **Financial Precision**: Using the `decimal` type for financial allocation and calculations, avoiding floating-point precision drift.
-3. **Data Integrity**: Using C# `record` types for immutable enrollment tracking with value-based equality.
-4. **Validated Properties**: Implementing property-level validation using the C# 14 `field` keyword.
-5. **Polymorphic Grade Contracts**: Defining a clean interface (`IGradable`) implemented by multiple assessment types (`Quiz`, `LabAssignment`) for flexible processing.
+- **Session 1** establishes the foundation: Null safety, financial precision, immutable records, validated properties, and grade interface contract.
+- **Session 2** builds on this: Adding defensive programming (guard clauses), academic standing classification using C# pattern matching (switch expressions), collection expressions with spread operator, and comprehensive LINQ querying.
 
-## Key Exercises Implemented
+## Key Exercises Implemented (Sessions 1 & 2)
 
-### Exercise 1: Null Safety Patterns
-- Safe navigation with null-conditional operator (`?.`)
-- Default values with null-coalescing operator (`??`)
-- In-place assignment with null-coalescing assignment (`??=`)
+### Session 1 Features
+- **Exercise 1: Null Safety Patterns** — Safe navigation (`?.`), coalescing (`??`), and assignment (`??=`).
+- **Exercise 2: Financial Precision** — Base-10 arithmetic using `decimal` for exact financial calculations.
+- **Exercise 3: Immutable Records** — Creates `EnrollmentRecord` using C# records for value-based equality and immutability.
+- **Exercise 3 Part 2 & 3: Validated Entity Models** — Concise validation in `Course` and `Student` using C# 14 `field` keyword.
+- **Exercise 3B: Polymorphic Interface Contracts** — `IGradable` interface contract with polymorphic quiz and lab grading.
 
-### Exercise 2: Financial Precision
-- Demonstrates floating-point drift with `double`
-- Implements base-10 arithmetic using `decimal` for exact financial calculations
-
-### Exercise 3: Immutable Records
-- Creates immutable records for event tracking
-- Uses `with` expression for non-destructive mutation
-- Verifies value-based equality
-
-### Exercise 3 Part 2 & 3: Validated Entity Models
-- `Course`: Implements property-level validation for title and capacity using the `field` keyword
-- `Student`: Validates student ID, name, age (16-100), and GPA (0.0-4.0)
-
-### Exercise 3B: Polymorphic Interface Contracts
-- `IGradable` interface contract
-- `Quiz` implementation (simple percentage score)
-- `LabAssignment` implementation (weighted score: 70% functionality, 30% code quality)
-- `PrintGradeReport` polymorphic engine
+### Session 2 Features
+- **Exercise 4: Guard Clauses for Defensive Programming** — Uses `EnrollmentService` to validate student registration preconditions (null checks, course capacity constraints) using the "fail-fast" paradigm.
+- **Exercise 5: LINQ Analytics Dashboard** — Leverages Language Integrated Query to build a statistics dashboard:
+  - Leaders Board (Filtering honors students, sorting, projecting).
+  - Class Average calculation.
+  - Academic standing classification grouping using a switch expression.
+- **Exercise 5 Part 2: Collection Expressions** — Demonstrates C# 12 collection expressions and the spread operator (`..`) to cleanly combine arrays.
 
 ## Build and Run Instructions
 
-To compile and run the Session 1 implementation:
+To compile and run the Sessions 1 & 2 implementation:
 
 ```bash
 cd TmsCore
@@ -71,9 +58,9 @@ Total allocated (decimal): 199999000.00
 Exact precision: 199999000.00
 
 --- Exercise 3: Data Integrity with Records ---
-Original enrollment: EnrollmentRecord { StudentId = STU-001, CourseCode = CS-401, EnrolledAt = 5/31/2026 11:39:27 AM }
-Corrected enrollment: EnrollmentRecord { StudentId = STU-001, CourseCode = CS-402, EnrolledAt = 5/31/2026 11:39:27 AM }
-Original unchanged: EnrollmentRecord { StudentId = STU-001, CourseCode = CS-401, EnrolledAt = 5/31/2026 11:39:27 AM }
+Original enrollment: EnrollmentRecord { StudentId = STU-001, CourseCode = CS-401, EnrolledAt = 5/31/2026 11:39:51 AM }
+Corrected enrollment: EnrollmentRecord { StudentId = STU-001, CourseCode = CS-402, EnrolledAt = 5/31/2026 11:39:51 AM }
+Original unchanged: EnrollmentRecord { StudentId = STU-001, CourseCode = CS-401, EnrolledAt = 5/31/2026 11:39:51 AM }
 Records are equal: True
 
 --- Exercise 3 Part 2: Property Validation ---
@@ -90,5 +77,42 @@ Student: Abeba, GPA: 3.8
 C# Basics: 90.00%
 Registration API: 88.50%
 
-=== Session 1 exercises completed successfully! ===
+
+=== SESSION 2: Query and Classification ===
+
+--- Exercise 4: Enrollment Service with Guard Clauses ---
+✓ Enrolled: S1 in CS-401
+✓ Guard caught null student: student
+✓ Business rule enforced: Course CS-402 is full. Capacity: 1, Enrolled: 1
+
+--- Exercise 5: Analytics Dashboard with LINQ ---
+Found 3 Honors Students:
+  - Sara
+  - Abeba
+  - Yonas
+
+Class Average GPA: 2.86
+
+--- Academic Standing Report ---
+
+Honors (3):
+  Abeba - GPA: 3.8
+  Sara - GPA: 3.9
+  Yonas - GPA: 3.5
+
+Good Standing (2):
+  Dawit - GPA: 3.1
+  Tesfaye - GPA: 2.9
+
+Probation (2):
+  Kidane - GPA: 2.4
+  Frehiwot - GPA: 2.0
+
+Academic Warning (1):
+  Meron - GPA: 1.8
+
+--- Collection Expressions ---
+Full curriculum: C#, ASP.NET Core, TypeScript, Angular, Capstone
+
+=== Sessions 1 and 2 exercises completed successfully! ===
 ```
