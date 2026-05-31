@@ -18,7 +18,8 @@ if ($authStatus -match "You are not logged into any GitHub hosts" -or $LASTEXITC
 }
 
 # Create the remote repository
-Write-Host "`nCreating remote repository 'TMS' on GitHub..." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Creating remote repository 'TMS' on GitHub..." -ForegroundColor Yellow
 & $ghPath repo create TMS --public --source=. --push
 
 if ($LASTEXITCODE -eq 0) {
@@ -28,13 +29,16 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 # Push all branches and tags
-Write-Host "`nPushing all local feature branches and tags to remote origin..." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Pushing all local feature branches and tags to remote origin..." -ForegroundColor Yellow
 git push origin --all
 git push origin --tags
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "`n=== TMS Platform successfully deployed to GitHub! ===" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "=== TMS Platform successfully deployed to GitHub! ===" -ForegroundColor Green
     Write-Host "Visit your repository to verify all branches and release tags are online." -ForegroundColor Green
 } else {
-    Write-Host "`nDeployment completed with some warnings/errors. Please check the logs above." -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Deployment completed with some warnings/errors. Please check the logs above." -ForegroundColor Red
 }
