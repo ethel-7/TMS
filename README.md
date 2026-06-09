@@ -46,7 +46,7 @@ dotnet run
 
 See [TmsCore/README.md](TmsCore/README.md) for detailed documentation.
 
-## TmsClient - TypeScript Frontend (Module 2)
+## TmsClient - TypeScript  (Module 2)
 
 **Technology**: TypeScript 6.0, Temporal API
 
