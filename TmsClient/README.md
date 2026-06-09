@@ -1,4 +1,4 @@
-# Training Management System (TMS) - Client Library
+# Training Management System (TMS) 
 
 ## Module 2 Lab Session 2: TypeScript Type System
 
